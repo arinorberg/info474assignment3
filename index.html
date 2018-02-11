@@ -7,6 +7,7 @@
 		body{
 			margin: 0;
 			font-family: arial, sans;
+      background-color: #9E9E9E;
 		}
 
     .well {
@@ -102,21 +103,35 @@
       stroke-width: 1.25px;
     }
 
+
 	</style>
 	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
   <link href="nouislider.min.css" rel="stylesheet">
+
 </head>
 
-<!-- dropdown -->
-<p>Choose variable X</p>
-<select id="dropdownX"></select>
 
-<p>Choose variable Y</p>
-<select id="dropdownY"></select>
 
 <body>
 
   <script src="nouislider.min.js"></script>
+  <script src="https://d3js.org/d3-color.v1.min.js"></script>
+  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+	<!-- dropdown -->
+	<p>Choose variable X</p>
+	<select id="dropdownX"></select>
+
+	<p>Choose variable Y</p>
+	<select id="dropdownY"></select>
+
+	<p>Choose color variable </p>
+	<select id="dropdownColor"></select>
+
+
+
+
 	<!-- slider -->
   <link href="nouislider.css" rel="stylesheet">
   <script src="nouislider.js"></script>
@@ -214,7 +229,8 @@
     // default
 		var selected_x = "crim"
 		var selected_y = "medv"
-		updateGraph(selected_x, selected_y);
+		var selected_color = "chas"
+		updateGraph(selected_x, selected_y, selected_color);
 
 		var dropdown_options = variables
 
@@ -230,7 +246,7 @@
 		var dropDown = d3.select("#dropdownX");
 		dropDown.on("change", function() {
 			selected_x = d3.event.target.value;
-			updateGraph(selected_x, selected_y)
+			updateGraph(selected_x, selected_y, selected_color)
 		});
 
 		// Choose Y variable
@@ -245,11 +261,27 @@
 		var dropDown = d3.select("#dropdownY");
 		dropDown.on("change", function() {
 			selected_x = d3.event.target.value;
-			updateGraph(selected_x, selected_y)
+			updateGraph(selected_x, selected_y, selected_color)
+		});
+
+
+		// Choose color variable
+		d3.select("#dropdownColor")
+		.selectAll("option")
+		.data(dropdown_options)
+		.enter()
+		.append("option")
+		.attr("value", function(option) { return option; })
+		.text(function(option) { return option; });
+
+		var dropDown = d3.select("#dropdownColor");
+		dropDown.on("change", function() {
+			selected_color = d3.event.target.value;
+			updateGraph(selected_x, selected_y, selected_color)
 		});
 
   // plot graph using selected x and y variables
-	function updateGraph(selected_x, selected_y) {
+	function updateGraph(selected_x, selected_y, selected_color) {
 		console.log("x: " + selected_x)
 		console.log("y: " + selected_y)
 
@@ -262,8 +294,6 @@
 		.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-
-
     xScale.domain(d3.extent(data, function(d){
 			return d[selected_x];
 		})).nice();
@@ -275,7 +305,9 @@
 
 		// radius.domain(d3.extent(data, function(d){
 		// 	return d.PetalLength;
-		// })).nice();
+		// })).nice()
+    ;
+    svg.style("background-color", "#515A5A");
 
 		// adding axes is also simpler now, just translate x-axis to (0,height) and it's alread defined to be a bottom axis.
 		svg.append('g')
@@ -289,13 +321,13 @@
 			.attr('class', 'y axis')
 			.call(yAxis);
 
-    var colors = ["#76D7C4", "#581845"];
+    //var colors = ["#76D7C4", "#581845"];
 
-    var colorScale = d3.scaleQuantile()
-      .domain([0, colors.length - 1, d3.max(data, function(d) {
-        return d;
-      })])
-      .range(colors);
+    // var colorScale = d3.scaleQuantile()
+    //   .domain([0, colors.length - 1, d3.max(data, function(d) {
+    //     return d;
+    //   })])
+    //   .range(colors);
 
 		var bubble = svg.selectAll('.bubble')
 			.data(data)
@@ -304,7 +336,7 @@
 			.attr('cx', function(d){return xScale(d[selected_x]);})
 			.attr('cy', function(d){ return yScale(d[selected_y]); })
 			.attr('r', 5)
-			.style('fill', function(d){ return colorScale(d.chas); });
+			.style('fill', function(d){ return d3.interpolateBuPu(d[selected_color]) });
 
     // hover tooltip
 		bubble.append('title')
@@ -316,7 +348,7 @@
         } else {
           chas = "yes"
         }
-        var tooltip = "Crime Rate = " + d[selected_x] + ", Median Value of Homes = " + d[selected_y] + ", by Charles river = " + chas
+        var tooltip = "X:" + selected_x + " = " + d[selected_x] + ", Y:" + selected_y + " = " + d[selected_y] + ", Color:" + selected_color + " = " + d[selected_color]
 				return  tooltip;
 			});
 
