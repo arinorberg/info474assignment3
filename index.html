@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <meta charset="utf-8">
+
 <style>
   svg {
   	width: 400px;
@@ -23,10 +24,11 @@
   var svg = d3.select("svg")
     // .append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-
-  // read in dataset
-
-  // var dataset =
+  // read in data
+  d3.csv("Boston.csv", function(error, data) {
+   if (error) throw error;
+       console.log(data);
+ }
 
 
 
