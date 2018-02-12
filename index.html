@@ -186,36 +186,30 @@
 		});
 		var dropdown_options = variables
 
-    // default
-		var selected_x = "crim"
-		var selected_y = "medv"
-		var selected_color = "chas"
 
 		// Get Full name of variable
-
 		function getNiceName(selected) {
 			var niceName = selected;
-
 			if (selected == "crim") {
 				niceName = "Per Capita Crime Rate"
 			} else if (selected == "zn") {
 				niceName = "Proportion of Residential Land Zoned for Lots over 25,000 sq.ft."
 			} else if (selected == "indus") {
 				niceName = "Proportion of Non-retail Business Acres"
-			} else if (selected == "Tracts Bounds the Charles River") {
-				niceName = "Proportion of Non-retail Business Acres"
+			} else if (selected == "chas") {
+				niceName = "Tract Bounds the Charles River"
 			} else if (selected == "nox") {
-				niceName = "Nitric oxides concentration (parts per 10 million)"
+				niceName = "Nitric Oxides Concentration (parts per 10 million)"
 			} else if (selected == "rm") {
 				niceName = "Average Number of Rooms per Dwelling"
 			} else if (selected == "age") {
-				niceName = "Proportion of Owner-occupied Units Built Prior to 1940"
+				niceName = "Proportion of Owner-Occupied Units Built Prior to 1940"
 			} else if (selected == "dis") {
 				niceName = "Weighted Distances to Five Boston Employment Centres"
 			} else if (selected == "rad") {
 				niceName = "Index of Accessibility to Radial Highways"
 			} else if (selected == "tax") {
-				niceName = "Full-value Property-tax Rate per $10,000"
+				niceName = "Full-value Property-Tax Rate per $10,000"
 			} else if (selected == "ptratio") {
 				niceName = "Pupil-teacher Ratio"
 			} else if (selected == "B") {
@@ -223,10 +217,15 @@
 			} else if (selected == "lstat") {
 				niceName = "% Lower Status of the Population"
 			} else {
-				niceName = "Median value of owner-occupied homes ($1000's)"
+				niceName = "Median Value of Owner-Occupied Homes ($1000's)"
 			}
 			return niceName;
 		}
+
+		// default
+		var selected_x = "crim"
+		var selected_y = "medv"
+		var selected_color = "chas"
 		var niceNameX = getNiceName(selected_x);
 		var niceNameY = getNiceName(selected_y);
 		var niceNameColor = getNiceName(selected_color);
@@ -279,6 +278,7 @@
 	function updateGraph(selected_x, selected_y, selected_color) {
 		console.log("x: " + selected_x)
 		console.log("y: " + selected_y)
+		console.log("color: " + selected_color)
 		d3.select("svg").remove();
 		var svg = d3.select('body')
 			.append('svg')
@@ -314,6 +314,15 @@
     //     return d;
     //   })])
     //   .range(colors);
+
+		function translateDummyVar (d, selected) {
+				 if (d[selected] == 0) {
+					 return "no"
+				 } else {
+					 return "yes"
+				 }
+		}
+    // add points to graph
 		var bubble = svg.selectAll('.bubble')
 			.data(data)
 			.enter().append('circle')
@@ -324,18 +333,25 @@
 			.style('fill', function(d){ return d3.interpolateBuPu(d[selected_color]) });
     // hover tooltip
 		bubble.append('title')
-			.attr('x', function(d){ return radius(d.chas); })
+			.attr('x', function(d){ return radius(1); })
 			.text(function(d){
-        var chas
-        // if (d.chas === 0) {
-        //   chas = "no"
-        // } else {
-        //   chas = "yes"
-        // }
-        var tooltip = "X:" + niceNameX + " = " + d[selected_x] + ", Y:" + niceNameY + " = " + d[selected_y] + ", Color:" + niceNameColor + " = " + d[selected_color]
+        // translate dummy variables for readability
+				var xval  = d[selected_x];
+				var yval  = d[selected_y];
+				var colorval  = d[selected_color];
+				if (selected_x =='chas') {
+						xval = translateDummyVar(d, selected_x);
+				}
+				if (selected_y =='chas') {
+						yval = translateDummyVar(d, selected_y);
+				}
+				if (selected_color =='chas') {
+						colorval = translateDummyVar(d, selected_color);
+				}
+        var tooltip = "X: " + niceNameX + " = " + xval + "\nY: " + niceNameY + " = " + yval + "\nColor: " + niceNameColor + " = " + colorval
 				return  tooltip;
 			});
-		// adding label. For x-axis, and for y-axis at (width, height-10).
+		// adding label. For x-axis, and for y-axis
 		svg.append('text')
 			.attr('x', 5)
 			.attr('y', 15)
@@ -433,7 +449,7 @@
       svg.style("background-color", "#515A5A");
       fillBubble(h);
     }
-    function addClassFor ( element, className, duration ) {
+    function addClassFor(element, className, duration) {
     	element.classList.add(className);
     	setTimeout(function(){
     		element.classList.remove(className);
