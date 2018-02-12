@@ -95,15 +95,16 @@
 	</style>
 
 	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
-  <link href="nouislider.min.css" rel="stylesheet">
+  <link href="./css/nouislider.min.css" rel="stylesheet">
 
 </head>
 <body>
 
-  <script src="nouislider.min.js"></script>
+  <script src="./js/nouislider.min.js"></script>
   <script src="https://d3js.org/d3-color.v1.min.js"></script>
   <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
   <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+	<script src=""
 
 	<!-- dropdowns -->
 	<div class="dropdowns">
@@ -120,8 +121,8 @@
 
 
 	<!-- slider -->
-  <link href="nouislider.css" rel="stylesheet">
-  <script src="nouislider.js"></script>
+  <link href="./css/nouislider.css" rel="stylesheet">
+  <script src="./js/nouislider.js"></script>
   <div class="well">
     <div id="slider" class="no-ui-slider">
       <div class="slider"></div>
@@ -180,7 +181,7 @@
 		.scale(yScale);
 	// again scaleOrdinal
 	var color = d3.scaleOrdinal(d3.schemeCategory20);
-	d3.csv('Boston.csv', function(error, data){
+	d3.csv('./data/Boston.csv', function(error, data){
 		var variables = d3.keys(data[0]);
 		data.forEach(function(d){
        d.crim = +d.crim;
