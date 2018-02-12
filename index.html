@@ -40,13 +40,14 @@
 			fill-opacity: 0.65;
 		}
 		.bubble{
-			opacity: .5;
+			opacity: .6;
 			transition: opacity 0.3s;
 		}
 		.bubble:hover text{
 			opacity: 1;
 		}
 		.bubble:hover circle{
+			opacity: 1;
 			fill-opacity: 1;
 		}
 		.legend rect{
@@ -99,12 +100,15 @@
   <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 
 	<!-- dropdowns -->
-	<p>Choose variable X</p>
-	<select id="dropdownX"></select>
-	<p>Choose variable Y</p>
-	<select id="dropdownY"></select>
-	<p>Choose color variable </p>
-	<select id="dropdownColor"></select>
+	<div class="dropdowns">
+		<p>Choose X variable</p>
+		<select id="dropdownX"></select>
+		<p>Choose Y variable</p>
+		<select id="dropdownY"></select>
+		<p>Choose Color variable </p>
+		<select id="dropdownColor"></select>
+	</div>
+
 
 	<!-- slider -->
   <link href="nouislider.css" rel="stylesheet">
@@ -154,7 +158,7 @@
 		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 	// The API for scales have changed in v4. There is a separate module d3-scale which can be used instead. The main change here is instead of d3.scale.linear, we have d3.scaleLinear.
 	var xScale = d3.scaleLinear()
-		.range([0, width - 55]);
+		.range([0, width - 25]);
 	var yScale = d3.scaleLinear()
 		.range([height, 25]);
 	// square root scale.
@@ -193,13 +197,13 @@
 			if (selected == "crim") {
 				niceName = "Per Capita Crime Rate"
 			} else if (selected == "zn") {
-				niceName = "Proportion of Residential Land Zoned for Lots over 25,000 sq.ft."
+				niceName = "Proportion of Residential Land Zoned for Lots"
 			} else if (selected == "indus") {
 				niceName = "Proportion of Non-retail Business Acres"
 			} else if (selected == "chas") {
 				niceName = "Tract Bounds the Charles River"
 			} else if (selected == "nox") {
-				niceName = "Nitric Oxides Concentration (parts per 10 million)"
+				niceName = "Nitric Oxides Concentration Parts (per 10 million)"
 			} else if (selected == "rm") {
 				niceName = "Average Number of Rooms per Dwelling"
 			} else if (selected == "age") {
@@ -351,18 +355,25 @@
         var tooltip = "X: " + niceNameX + " = " + xval + "\nY: " + niceNameY + " = " + yval + "\nColor: " + niceNameColor + " = " + colorval
 				return  tooltip;
 			});
+    // adding title
+		svg.append("text")
+        .attr("x", (width / 2))
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "16px")
+        .text(niceNameX + " vs. " + niceNameY);
 		// adding label. For x-axis, and for y-axis
 		svg.append('text')
 			.attr('x', 5)
 			.attr('y', 15)
 			.attr('class', 'label')
-      .text(niceNameX);
+      .text(selected_x);
 		svg.append('text')
 			.attr('x', width)
 			.attr('y', height - 5)
 			.attr('text-anchor', 'end')
 			.attr('class', 'label')
-			.text(niceNameY);
+			.text(selected_y);
 		// I feel I understand legends much better now.
 		// define a group element for each color i, and translate it to (0, i * 20).
 		var legend = svg.selectAll('legend')
