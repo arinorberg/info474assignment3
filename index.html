@@ -84,14 +84,13 @@
       stroke-opacity: 0.5;
       stroke-width: 1.25px;
     }
+
 	</style>
+
 	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
   <link href="nouislider.min.css" rel="stylesheet">
 
 </head>
-
-
-
 <body>
 
   <script src="nouislider.min.js"></script>
@@ -99,18 +98,13 @@
   <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
   <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 
-	<!-- dropdown -->
+	<!-- dropdowns -->
 	<p>Choose variable X</p>
 	<select id="dropdownX"></select>
-
 	<p>Choose variable Y</p>
 	<select id="dropdownY"></select>
-
 	<p>Choose color variable </p>
 	<select id="dropdownColor"></select>
-
-
-
 
 	<!-- slider -->
   <link href="nouislider.css" rel="stylesheet">
@@ -150,8 +144,8 @@
   });
 // layout based on: http://blockbuilder.org/Jverma/076377dd0125b1a508621441752735fc
 	var margin = {top: 30, right: 50, bottom: 40, left:40};
-	var width = 960 - margin.left - margin.right;
-	var height = 500 - margin.top - margin.bottom;
+	var width = 700 - margin.left - margin.right;
+	var height = 575 - margin.top - margin.bottom;
 	var svg = d3.select('body')
 		.append('svg')
 		.attr('width', width + margin.left + margin.right)
@@ -160,9 +154,9 @@
 		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 	// The API for scales have changed in v4. There is a separate module d3-scale which can be used instead. The main change here is instead of d3.scale.linear, we have d3.scaleLinear.
 	var xScale = d3.scaleLinear()
-		.range([0, width]);
+		.range([0, width - 55]);
 	var yScale = d3.scaleLinear()
-		.range([height, 55]);
+		.range([height, 25]);
 	// square root scale.
 	var radius = d3.scaleSqrt()
 		.range([2,5]);
@@ -190,12 +184,54 @@
 			 d.b = +d.b;
        d.medv = +d.medv;
 		});
+		var dropdown_options = variables
+
     // default
 		var selected_x = "crim"
 		var selected_y = "medv"
 		var selected_color = "chas"
+
+		// Get Full name of variable
+
+		function getNiceName(selected) {
+			var niceName = selected;
+
+			if (selected == "crim") {
+				niceName = "Per Capita Crime Rate"
+			} else if (selected == "zn") {
+				niceName = "Proportion of Residential Land Zoned for Lots over 25,000 sq.ft."
+			} else if (selected == "indus") {
+				niceName = "Proportion of Non-retail Business Acres"
+			} else if (selected == "Tracts Bounds the Charles River") {
+				niceName = "Proportion of Non-retail Business Acres"
+			} else if (selected == "nox") {
+				niceName = "Nitric oxides concentration (parts per 10 million)"
+			} else if (selected == "rm") {
+				niceName = "Average Number of Rooms per Dwelling"
+			} else if (selected == "age") {
+				niceName = "Proportion of Owner-occupied Units Built Prior to 1940"
+			} else if (selected == "dis") {
+				niceName = "Weighted Distances to Five Boston Employment Centres"
+			} else if (selected == "rad") {
+				niceName = "Index of Accessibility to Radial Highways"
+			} else if (selected == "tax") {
+				niceName = "Full-value Property-tax Rate per $10,000"
+			} else if (selected == "ptratio") {
+				niceName = "Pupil-teacher Ratio"
+			} else if (selected == "B") {
+				niceName = "Proportion of Blacks"
+			} else if (selected == "lstat") {
+				niceName = "% Lower Status of the Population"
+			} else {
+				niceName = "Median value of owner-occupied homes ($1000's)"
+			}
+			return niceName;
+		}
+		var niceNameX = getNiceName(selected_x);
+		var niceNameY = getNiceName(selected_y);
+		var niceNameColor = getNiceName(selected_color);
 		updateGraph(selected_x, selected_y, selected_color);
-		var dropdown_options = variables
+
 		// Choose X variable
 		d3.select("#dropdownX")
 		.selectAll("option")
@@ -207,6 +243,7 @@
 		var dropDown = d3.select("#dropdownX");
 		dropDown.on("change", function() {
 			selected_x = d3.event.target.value;
+			niceNameX = getNiceName(selected_x);
 			updateGraph(selected_x, selected_y, selected_color)
 		});
 		// Choose Y variable
@@ -220,6 +257,7 @@
 		var dropDown = d3.select("#dropdownY");
 		dropDown.on("change", function() {
 			selected_y = d3.event.target.value;
+			niceNameY = getNiceName(selected_y);
 			updateGraph(selected_x, selected_y, selected_color)
 		});
 		// Choose color variable
@@ -233,8 +271,10 @@
 		var dropDown = d3.select("#dropdownColor");
 		dropDown.on("change", function() {
 			selected_color = d3.event.target.value;
+			niceNameColor = getNiceName(selected_color);
 			updateGraph(selected_x, selected_y, selected_color)
 		});
+
   // plot graph using selected x and y variables
 	function updateGraph(selected_x, selected_y, selected_color) {
 		console.log("x: " + selected_x)
@@ -287,26 +327,26 @@
 			.attr('x', function(d){ return radius(d.chas); })
 			.text(function(d){
         var chas
-        if (d.chas === 0) {
-          chas = "no"
-        } else {
-          chas = "yes"
-        }
-        var tooltip = "X:" + selected_x + " = " + d[selected_x] + ", Y:" + selected_y + " = " + d[selected_y] + ", Color:" + selected_color + " = " + d[selected_color]
+        // if (d.chas === 0) {
+        //   chas = "no"
+        // } else {
+        //   chas = "yes"
+        // }
+        var tooltip = "X:" + niceNameX + " = " + d[selected_x] + ", Y:" + niceNameY + " = " + d[selected_y] + ", Color:" + niceNameColor + " = " + d[selected_color]
 				return  tooltip;
 			});
-		// adding label. For x-axis, it's at (10, 10), and for y-axis at (width, height-10).
+		// adding label. For x-axis, and for y-axis at (width, height-10).
 		svg.append('text')
-			.attr('x', 10)
-			.attr('y', 40)
+			.attr('x', 5)
+			.attr('y', 15)
 			.attr('class', 'label')
-      .text(selected_x);
+      .text(niceNameX);
 		svg.append('text')
 			.attr('x', width)
-			.attr('y', height - 10)
+			.attr('y', height - 5)
 			.attr('text-anchor', 'end')
 			.attr('class', 'label')
-			.text(selected_y);
+			.text(niceNameY);
 		// I feel I understand legends much better now.
 		// define a group element for each color i, and translate it to (0, i * 20).
 		var legend = svg.selectAll('legend')
