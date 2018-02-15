@@ -3,107 +3,22 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Assignment 3</title>
-	<style type="text/css">
-		body{
-			margin: 0;
-			font-family: arial, sans;
-      background-color: #9E9E9E;
-		}
-    .well {
-      padding: 40px;
-      width: 400px;
-    }
-    .sliderlabels ul {
-      display: flex;
-      justify-content: space-between;
-      width: 100%;
-      padding-left: 0px;
-    }
-    .sliderlabels li {
-      display: inline;
-    }
-		.label{
-			font-size: 15px;
-		}
-		.legend text,
-		.axis text {
-			font-size: 13px;
-			fill: #333;
-		}
-		.axis path,
-		.axis line{
-			fill: none;
-			stroke-width: 1px;
-			stroke: #777;
-		}
-		.circle{
-			fill-opacity: 0.65;
-		}
-		.bubble{
-			opacity: .6;
-			transition: opacity 0.3s;
-		}
-		.bubble:hover text{
-			opacity: 1;
-		}
-		.bubble:hover {
-			opacity: 1;
-			fill-opacity: 1;
-			r: 10;
-		}
-
-		circle.bubble:hover {
-			r: 7;
-		}
-
-		.legend rect{
-			fill-opacity: 0.75;
-		}
-		.legend:hover rect{
-			fill-opacity:1;
-		}
-    .ticks {
-      font: 10px sans-serif;
-    }
-    .track,
-    .track-inset,
-    .track-overlay {
-      stroke-linecap: round;
-    }
-    .track {
-      stroke: #000;
-      stroke-opacity: 0.3;
-      stroke-width: 10px;
-    }
-    .track-inset {
-      stroke: #ddd;
-      stroke-width: 8px;
-    }
-    .track-overlay {
-      pointer-events: stroke;
-      stroke-width: 50px;
-      stroke: transparent;
-      cursor: crosshair;
-    }
-    .handle {
-      fill: #fff;
-      stroke: #000;
-      stroke-opacity: 0.5;
-      stroke-width: 1.25px;
-    }
-
-	</style>
-
 	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
-  <link href="nouislider.min.css" rel="stylesheet">
-
+  <link href="./css/nouislider.min.css" rel="stylesheet">
+	<link rel="stylesheet" type="text/css" href="./css/style.css"></link>
 </head>
 <body>
 
-  <script src="nouislider.min.js"></script>
+  <script src="./js/nouislider.min.js"></script>
   <script src="https://d3js.org/d3-color.v1.min.js"></script>
   <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
   <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+
+	<!-- slider from lecture -->
+	<script src="./js/jquery-3.3.1.min.js"></script>
+	<script src="./js/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
+	<!-- <script type="text/javascript" src="http//code.jquery.com/jquery-1.10.2.js"></script>
+	<script type="text/javascript" src="http//code.jquery.com/ui/1.11.1/jqueryui.js"></script> --> -->
 
 	<!-- dropdowns -->
 	<div class="dropdowns">
@@ -115,48 +30,23 @@
 		<select id="dropdownColor"></select>
 	</div>
 
-	<!-- return button-->
+	<!-- reverse button-->
 	<div class="button">
 			<button id="reverse">Reverse Axis</button>
 	</div>
 
+<!-- slider from online - attempt3 -->
+<p>filter X</p>
+<input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
 
-	<!-- slider -->
-  <link href="nouislider.css" rel="stylesheet">
-  <script src="nouislider.js"></script>
-  <div class="well">
-    <div id="slider" class="no-ui-slider">
-      <div class="slider"></div>
-    </div>
-    <div class="sliderlabels">
-      <ul class="tenthings">
-        <li>0</li>
-        <li>10</li>
-        <li>20</li>
-        <li>30</li>
-        <li>40</li>
-        <li>50</li>
-        <li>60</li>
-        <li>70</li>
-        <li>80</li>
-        <li>90</li>
-      </ul>
-    </div>
-  </div>
-  <div id="range" class="no-ui-slider">
+<p>filter Y</p>
+<input id="yVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
 
 
   <script>
-  var slider = document.getElementById('slider');
-  var sliderEventListener = noUiSlider.create(slider, {
-  	start: [ 0 ],
-  	range: {
-  		'min': 0,
-  		'max': 90
-  	},
-    tooltips: true,
-    behaviour: 'tap-drag'
-  });
+
+
+
 // layout based on: http://blockbuilder.org/Jverma/076377dd0125b1a508621441752735fc
 	var margin = {top: 30, right: 50, bottom: 40, left:40};
 	var width = 700 - margin.left - margin.right;
@@ -169,9 +59,9 @@
 		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 	// The API for scales have changed in v4. There is a separate module d3-scale which can be used instead. The main change here is instead of d3.scale.linear, we have d3.scaleLinear.
 	var xScale = d3.scaleLinear()
-		.range([0, width - 25]);
+		.range([0, width]);
 	var yScale = d3.scaleLinear()
-		.range([height, 25]);
+		.range([height, 0]);
 	// square root scale.
 	var radius = d3.scaleSqrt()
 		.range([2,5]);
@@ -182,7 +72,7 @@
 		.scale(yScale);
 	// again scaleOrdinal
 	var color = d3.scaleOrdinal(d3.schemeCategory20);
-	d3.csv('Boston.csv', function(error, data){
+	d3.csv('./data/Boston.csv', function(error, data){
 		var variables = d3.keys(data[0]);
 		data.forEach(function(d){
        d.crim = +d.crim;
@@ -202,7 +92,7 @@
 		var dropdown_options = variables
 
 
-		// Get Full name of variable
+		// Get nice name of variable
 		function getNiceName(selected) {
 			var niceName = selected;
 			if (selected == "crim") {
@@ -238,13 +128,26 @@
 		}
 
 		// default
-		var selected_x = "crim"
-		var selected_y = "medv"
-		var selected_color = "chas"
+		var selected_x = "crim";
+		var selected_y = "medv";
+		var selected_color = "chas";
 		var niceNameX = getNiceName(selected_x);
 		var niceNameY = getNiceName(selected_y);
 		var niceNameColor = getNiceName(selected_color);
-		updateGraph(selected_x, selected_y, selected_color);
+		var maxX = d3.max(data, function(d) { return d[selected_x]});
+		var maxY = d3.max(data, function(d) { return d[selected_y]});
+
+		document.getElementById('xVal').min = 0;
+		document.getElementById('xVal').max = maxX;
+		document.getElementById('xVal').step = maxX / 10;
+		document.getElementById('xVal').value = maxX / 2;
+
+		document.getElementById('yVal').min = 0;
+		document.getElementById('yVal').max = maxY;
+		document.getElementById('yVal').step = maxY / 10;
+		document.getElementById('yVal').value= maxY / 2;
+
+		updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 
 
 		// Choose X variable
@@ -259,7 +162,11 @@
 		dropDown.on("change", function() {
 			selected_x = d3.event.target.value;
 			niceNameX = getNiceName(selected_x);
-			updateGraph(selected_x, selected_y, selected_color)
+			document.getElementById('xVal').min = 0;
+			document.getElementById('xVal').max = maxX;
+			document.getElementById('xVal').step = maxX / 10;
+			document.getElementById('xVal').value = maxX / 2;
+			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
 		});
 		// Choose Y variable
 		d3.select("#dropdownY")
@@ -273,7 +180,11 @@
 		dropDown.on("change", function() {
 			selected_y = d3.event.target.value;
 			niceNameY = getNiceName(selected_y);
-			updateGraph(selected_x, selected_y, selected_color)
+			document.getElementById('yVal').min = 0;
+			document.getElementById('yVal').max = maxY;
+			document.getElementById('yVal').step = maxY / 10;
+			document.getElementById('yVal').value= maxY / 2;
+			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 		});
 		// Choose color variable
 		d3.select("#dropdownColor")
@@ -287,25 +198,38 @@
 		dropDown.on("change", function() {
 			selected_color = d3.event.target.value;
 			niceNameColor = getNiceName(selected_color);
-			updateGraph(selected_x, selected_y, selected_color);
+			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 		});
 
 		function reverse(selected_x, selected_y, selected_color) {
-			updateGraph(selected_x, selected_y, selected_color);
+			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 		}
 
 		// Choose color variable
 		var button = d3.select("#reverse");
 		button.on("click", function() {
-			reverse(selected_y, selected_x, selected_color);
+			reverse(selected_y, selected_x, selected_color, maxX, maxY);
 			var temp = selected_y;
 			selected_y = selected_x;
 			selected_x = temp;
 		});
 
 
+
+		// slider from online - attempt3
+		document.getElementById('xVal').addEventListener('change', function() {
+			maxX = this.value;
+			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
+		});
+
+		// slider from online - attempt3
+		document.getElementById('yVal').addEventListener('change', function() {
+			maxY = this.value;
+			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
+		});
+
   // plot graph using selected x and y variables
-	function updateGraph(selected_x, selected_y, selected_color) {
+	function updateGraph(selected_x, selected_y, selected_color, maxX, maxY) {
 		console.log("x: " + selected_x)
 		console.log("y: " + selected_y)
 		console.log("color: " + selected_color)
@@ -317,10 +241,14 @@
 		.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
     xScale.domain(d3.extent(data, function(d){
-			return d[selected_x];
+			if (d[selected_x] < maxX) {
+				return d[selected_x];
+			}
 		})).nice();
 		yScale.domain(d3.extent(data, function(d){
-			return d[selected_y];
+			if (d[selected_y] < maxY) {
+				return d[selected_y];
+			}
 		})).nice();
   // });
 		// radius.domain(d3.extent(data, function(d){
@@ -338,12 +266,6 @@
 			.attr('transform', 'translate(0,0)')
 			.attr('class', 'y axis')
 			.call(yAxis);
-    //var colors = ["#76D7C4", "#581845"];
-    // var colorScale = d3.scaleQuantile()
-    //   .domain([0, colors.length - 1, d3.max(data, function(d) {
-    //     return d;
-    //   })])
-    //   .range(colors);
 
 		function translateDummyVar (d, selected) {
 				 if (d[selected] == 0) {
@@ -432,44 +354,6 @@
 				.style('opacity', 1);
 		})
 	}
-    // SLIDER
-    // var slider = svg.append("g")
-    //     .attr("class", "slider")
-    //     .attr("transform", "translate(" + 0 + "," + 1 + ")");
-    //
-    // slider.append("line")
-    //     .attr("class", "track")
-    //     .attr("x1", xScale.range()[0])
-    //     .attr("x2", xScale.range()[1])
-    //   .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-    //     .attr("class", "track-inset")
-    //   .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
-    //     .attr("class", "track-overlay")
-    //     .call(d3.drag()
-    //         .on("start.interrupt", function() { slider.interrupt(); })
-    //         //.on("start drag", function() { hue(xScale.invert(d3.event.xScale)); }));
-    //         .on("start drag", function() { hue(d3.event.dx); }));
-    //
-    // slider.insert("g", ".track-overlay")
-    //     .attr("class", "ticks")
-    //     .attr("transform", "translate(0," + 18 + ")")
-    //   .selectAll("text")
-    //   .data(xScale.ticks(10))
-    //   .enter().append("text")
-    //     .attr("x", xScale)
-    //     .attr("text-anchor", "middle")
-    //     .text(function(d) { return d; });
-    //
-    // var handle = slider.insert("circle", ".track-overlay")
-    //     .attr("class", "handle")
-    //     .attr("r", 9);
-    //
-    // slider.transition()
-    //     .duration(750)
-    //     .tween("hue", function() {
-    //       var i = d3.interpolate(0, 70);
-    //       return function(t) { hue(i(t)); };
-    //     });
     function fillBubble(h) {
       svg.selectAll('.bubble').call(function(b) {
         if (b.cx < h) {
@@ -492,14 +376,6 @@
     		element.classList.remove(className);
     	}, duration);
     }
-    sliderEventListener.on('change', function(){
-      svg.selectAll('.bubble').call(function(b) {
-        if (b.cx < slider.noUiSlider.get()) {
-          console.log(b.cx)
-          b.style("fill", "#000000");
-        }
-      });
-    });
 	})
 </script>
 

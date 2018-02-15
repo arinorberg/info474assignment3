@@ -1,0 +1,87 @@
+body{
+  margin: 0;
+  font-family: arial, sans;
+  background-color: #9E9E9E;
+}
+.well {
+  padding: 40px;
+  width: 400px;
+}
+.sliderlabels ul {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-left: 0px;
+}
+.sliderlabels li {
+  display: inline;
+}
+.label{
+  font-size: 15px;
+}
+.legend text,
+.axis text {
+  font-size: 13px;
+  fill: #333;
+}
+.axis path,
+.axis line{
+  fill: none;
+  stroke-width: 1px;
+  stroke: #777;
+}
+.circle{
+  fill-opacity: 0.65;
+}
+.bubble{
+  opacity: .6;
+  transition: opacity 0.3s;
+}
+.bubble:hover text{
+  opacity: 1;
+}
+.bubble:hover {
+  opacity: 1;
+  fill-opacity: 1;
+  r: 10;
+}
+
+circle.bubble:hover {
+  r: 7;
+}
+
+.legend rect{
+  fill-opacity: 0.75;
+}
+.legend:hover rect{
+  fill-opacity:1;
+}
+.ticks {
+  font: 10px sans-serif;
+}
+.track,
+.track-inset,
+.track-overlay {
+  stroke-linecap: round;
+}
+.track {
+  stroke: #000;
+  stroke-opacity: 0.3;
+  stroke-width: 10px;
+}
+.track-inset {
+  stroke: #ddd;
+  stroke-width: 8px;
+}
+.track-overlay {
+  pointer-events: stroke;
+  stroke-width: 50px;
+  stroke: transparent;
+  cursor: crosshair;
+}
+.handle {
+  fill: #fff;
+  stroke: #000;
+  stroke-opacity: 0.5;
+  stroke-width: 1.25px;
+}
