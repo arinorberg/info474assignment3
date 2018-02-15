@@ -4,74 +4,50 @@
 	<meta charset="UTF-8">
 	<title>Assignment 3</title>
 	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
-  <link href="./css/nouislider.min.css" rel="stylesheet">
 	<link rel="stylesheet" type="text/css" href="./css/style.css"></link>
 </head>
 <body>
 
-  <script src="./js/nouislider.min.js"></script>
+	<!-- D3 -->
   <script src="https://d3js.org/d3-color.v1.min.js"></script>
   <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
   <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 
-	<!-- slider from lecture -->
+	<!-- jQuery -->
 	<script src="./js/jquery-3.3.1.min.js"></script>
 	<script src="./js/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
 	<!-- <script type="text/javascript" src="http//code.jquery.com/jquery-1.10.2.js"></script>
-	<script type="text/javascript" src="http//code.jquery.com/ui/1.11.1/jqueryui.js"></script> --> -->
-
-	<!-- dropdowns -->
-	<div class="dropdowns">
-		<p>Choose X variable</p>
-		<select id="dropdownX"></select>
-		<p>Choose Y variable</p>
-		<select id="dropdownY"></select>
-		<p>Choose Color variable </p>
-		<select id="dropdownColor"></select>
-	</div>
-
-	<!-- reverse button-->
-	<div class="button">
-			<button id="reverse">Reverse Axis</button>
-	</div>
-
-<!-- slider from online - attempt3 -->
-<p>filter X</p>
-<input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
-
-<p>filter Y</p>
-<input id="yVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
+	<script type="text/javascript" src="http//code.jquery.com/ui/1.11.1/jqueryui.js"></script> -->
 
 
-  <script>
+	<script>
 
+	// layout based on: http://blockbuilder.org/Jverma/076377dd0125b1a508621441752735fc
 
-
-// layout based on: http://blockbuilder.org/Jverma/076377dd0125b1a508621441752735fc
 	var margin = {top: 30, right: 50, bottom: 40, left:40};
 	var width = 700 - margin.left - margin.right;
 	var height = 575 - margin.top - margin.bottom;
+
 	var svg = d3.select('body')
 		.append('svg')
 		.attr('width', width + margin.left + margin.right)
 		.attr('height', height + margin.top + margin.bottom)
 	.append('g')
 		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-	// The API for scales have changed in v4. There is a separate module d3-scale which can be used instead. The main change here is instead of d3.scale.linear, we have d3.scaleLinear.
+
 	var xScale = d3.scaleLinear()
 		.range([0, width]);
 	var yScale = d3.scaleLinear()
 		.range([height, 0]);
-	// square root scale.
 	var radius = d3.scaleSqrt()
 		.range([2,5]);
-	// the axes are much cleaner and easier now. No need to rotate and orient the axis, just call axisBottom, axisLeft etc.
 	var xAxis = d3.axisBottom()
 		.scale(xScale);
 	var yAxis = d3.axisLeft()
 		.scale(yScale);
-	// again scaleOrdinal
 	var color = d3.scaleOrdinal(d3.schemeCategory20);
+
+  // read in data
 	d3.csv('./data/Boston.csv', function(error, data){
 		var variables = d3.keys(data[0]);
 		data.forEach(function(d){
@@ -89,10 +65,10 @@
 			 d.b = +d.b;
        d.medv = +d.medv;
 		});
-		var dropdown_options = variables
+		var dropdown_options = variables;
 
 
-		// Get nice name of variable
+		// get nice name of variable
 		function getNiceName(selected) {
 			var niceName = selected;
 			if (selected == "crim") {
@@ -136,27 +112,25 @@
 		var niceNameColor = getNiceName(selected_color);
 		var maxX = d3.max(data, function(d) { return d[selected_x]});
 		var maxY = d3.max(data, function(d) { return d[selected_y]});
-
 		document.getElementById('xVal').min = 0;
 		document.getElementById('xVal').max = maxX;
 		document.getElementById('xVal').step = maxX / 10;
 		document.getElementById('xVal').value = maxX / 2;
-
 		document.getElementById('yVal').min = 0;
 		document.getElementById('yVal').max = maxY;
 		document.getElementById('yVal').step = maxY / 10;
 		document.getElementById('yVal').value= maxY / 2;
-
 		updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 
 
-		// Choose X variable
+		// update x-axis when new X variable is chosen (dropdown)
 		d3.select("#dropdownX")
 		.selectAll("option")
 		.data(dropdown_options)
 		.enter()
 		.append("option")
 		.attr("value", function(option) { return option; })
+		.property("selected", function(d){ return d === selected_x; })
 		.text(function(option) { return option; });
 		var dropDown = d3.select("#dropdownX");
 		dropDown.on("change", function() {
@@ -168,13 +142,15 @@
 			document.getElementById('xVal').value = maxX / 2;
 			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
 		});
-		// Choose Y variable
+
+		// update y-axis when new Y variable is chosen (dropdown)
 		d3.select("#dropdownY")
 		.selectAll("option")
 		.data(dropdown_options)
 		.enter()
 		.append("option")
 		.attr("value", function(option) { return option; })
+		.property("selected", function(d){ return d === selected_y; })
 		.text(function(option) { return option; });
 		var dropDown = d3.select("#dropdownY");
 		dropDown.on("change", function() {
@@ -186,13 +162,15 @@
 			document.getElementById('yVal').value= maxY / 2;
 			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 		});
-		// Choose color variable
+
+		// update color encoding when new color variable is chosen (dropdown)
 		d3.select("#dropdownColor")
 		.selectAll("option")
 		.data(dropdown_options)
 		.enter()
 		.append("option")
 		.attr("value", function(option) { return option; })
+		.property("selected", function(d){ return d === selected_color; })
 		.text(function(option) { return option; });
 		var dropDown = d3.select("#dropdownColor");
 		dropDown.on("change", function() {
@@ -201,11 +179,10 @@
 			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 		});
 
+		// reverse x and y axes when Reverse Axis is used (button)
 		function reverse(selected_x, selected_y, selected_color) {
 			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 		}
-
-		// Choose color variable
 		var button = d3.select("#reverse");
 		button.on("click", function() {
 			reverse(selected_y, selected_x, selected_color, maxX, maxY);
@@ -214,21 +191,19 @@
 			selected_x = temp;
 		});
 
-
-
-		// slider from online - attempt3
+		// update x-axis when x filter is changed (slider)
 		document.getElementById('xVal').addEventListener('change', function() {
 			maxX = this.value;
 			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
 		});
 
-		// slider from online - attempt3
+		// update y-axis when y filter is changed (slider)
 		document.getElementById('yVal').addEventListener('change', function() {
 			maxY = this.value;
 			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
 		});
 
-  // plot graph using selected x and y variables
+  // plot graph using selected x, y and color variables, and selected x and y value filters
 	function updateGraph(selected_x, selected_y, selected_color, maxX, maxY) {
 		console.log("x: " + selected_x)
 		console.log("y: " + selected_y)
@@ -250,18 +225,12 @@
 				return d[selected_y];
 			}
 		})).nice();
-  // });
-		// radius.domain(d3.extent(data, function(d){
-		// 	return d.PetalLength;
-		// })).nice()
-    ;
+
     svg.style("background-color", "#515A5A");
-		// adding axes is also simpler now, just translate x-axis to (0,height) and it's alread defined to be a bottom axis.
 		svg.append('g')
 			.attr('transform', 'translate(0,' + height + ')')
 			.attr('class', 'x axis')
 			.call(xAxis);
-		// y-axis is translated to (0,0)
 		svg.append('g')
 			.attr('transform', 'translate(0,0)')
 			.attr('class', 'y axis')
@@ -283,6 +252,7 @@
 			.attr('cy', function(d){ return yScale(d[selected_y]); })
 			.attr('r', 5)
 			.style('fill', function(d){ return d3.interpolateBuPu(d[selected_color]) });
+
     // hover tooltip
 		bubble.append('title')
 			.attr('x', function(d){ return radius(1); })
@@ -303,14 +273,15 @@
         var tooltip = "X: " + niceNameX + " = " + xval + "\nY: " + niceNameY + " = " + yval + "\nColor: " + niceNameColor + " = " + colorval
 				return  tooltip;
 			});
-    // adding title
+
+    // add title to graph
 		svg.append("text")
         .attr("x", (width / 2))
         .attr("y", 0 - (margin.top / 2))
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
         .text(niceNameX + " vs. " + niceNameY);
-		// adding label. For x-axis, and for y-axis
+		// add label for x-axis and y-axis
 		svg.append('text')
 			.attr('x', 5)
 			.attr('y', 15)
@@ -322,8 +293,9 @@
 			.attr('text-anchor', 'end')
 			.attr('class', 'label')
 			.text(selected_y);
-		// I feel I understand legends much better now.
-		// define a group element for each color i, and translate it to (0, i * 20).
+
+    // ??????? doesnt work
+    // add legend
 		var legend = svg.selectAll('legend')
 			.data(color.domain())
 			.enter().append('g')
@@ -354,30 +326,71 @@
 				.style('opacity', 1);
 		})
 	}
-    function fillBubble(h) {
-      svg.selectAll('.bubble').call(function(b) {
-        if (b.cx < h) {
-          console.log(b.cx)
-          b.style("fill", "#000000");
-        }
-      });
-    }
-    fillBubble(20);
-    function hue(h) {
-      // console.log(h)
-      handle.attr("cx", xScale(h));
-      console.log(handle.cx)
-      svg.style("background-color", "#515A5A");
-      fillBubble(h);
-    }
-    function addClassFor(element, className, duration) {
-    	element.classList.add(className);
-    	setTimeout(function(){
-    		element.classList.remove(className);
-    	}, duration);
-    }
+
+  	// //??????????????
+    // function fillBubble(h) {
+    //   svg.selectAll('.bubble').call(function(b) {
+    //     if (b.cx < h) {
+    //       console.log(b.cx)
+    //       b.style("fill", "#000000");
+    //     }
+    //   });
+    // }
+    // fillBubble(20);
+    // function hue(h) {
+    //   // console.log(h)
+    //   handle.attr("cx", xScale(h));
+    //   console.log(handle.cx)
+    //   svg.style("background-color", "#515A5A");
+    //   fillBubble(h);
+    // }
+    // function addClassFor(element, className, duration) {
+    // 	element.classList.add(className);
+    // 	setTimeout(function(){
+    // 		element.classList.remove(className);
+    // 	}, duration);
+    // }
+
+
 	})
 </script>
+
+
+<div class="bigbox">
+	<div id="graph" class="box"></div>
+		<div class="box">
+			<!-- dropdowns -->
+			<div class="box">
+				<div class="dropdowns">
+					<p>Choose X variable</p>
+					<select id="dropdownX"></select>
+					<p>Choose Y variable</p>
+					<select id="dropdownY"></select>
+					<p>Choose Color variable </p>
+					<select id="dropdownColor"></select>
+				</div>
+			</div>
+
+			<div class="box">
+				<div>
+					<!-- slider from online - attempt3 -->
+					<p>filter X</p>
+					<input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
+
+					<p>filter Y</p>
+					<input id="yVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
+				</div>
+			</div>
+
+			<div class="box">
+				<!-- reverse button-->
+				<div class="button">
+						<button id="reverse">Reverse Axis</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
 
 </body>
 </html>
