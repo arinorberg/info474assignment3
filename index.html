@@ -111,9 +111,17 @@
 		var niceNameY = getNiceName(selected_y);
 		var niceNameColor = getNiceName(selected_color);
 		var maxX = d3.max(data, function(d) { return d[selected_x]});
+		var minX= d3.min(data, function(d) { return d[selected_x]});
 		var maxY = d3.max(data, function(d) { return d[selected_y]});
+		var minY= d3.min(data, function(d) { return d[selected_x]});
+		var maxColor = d3.max(data, function(d) { return d[selected_color]});
+		var minColor = d3.min(data, function(d) { return d[selected_color]});
 		document.getElementById("XMax").innerHTML = maxX;
 		document.getElementById("YMax").innerHTML = maxY;
+		document.getElementById("ColorMax").innerHTML = maxColor;
+		document.getElementById("ColorMin").innerHTML = minColor;
+		document.getElementById("XMin").innerHTML = minX;
+		document.getElementById("YMin").innerHTML = minY;
 		document.getElementById('xVal').min = 0;
 		document.getElementById('xVal').max = maxX;
 		document.getElementById('xVal').step = maxX / 10;
@@ -139,7 +147,9 @@
 			selected_x = d3.event.target.value;
 			niceNameX = getNiceName(selected_x);
 			maxX = d3.max(data, function(d) { return d[selected_x]});
+			minX = d3.min(data, function(d) { return d[selected_x]});
 			document.getElementById("XMax").innerHTML = maxX;
+			document.getElementById("XMin").innerHTML = minX;
 			document.getElementById('xVal').min = 0;
 			document.getElementById('xVal').max = maxX;
 			document.getElementById('xVal').step = maxX / 10;
@@ -160,9 +170,11 @@
 		dropDown.on("change", function() {
 			selected_y = d3.event.target.value;
 			niceNameY = getNiceName(selected_y);
-			document.getElementById('yVal').min = 0;
 			maxY = d3.max(data, function(d) { return d[selected_y]});
+			minY = d3.min(data, function(d) { return d[selected_y]});
 			document.getElementById("YMax").innerHTML = maxY;
+			document.getElementById("YMin").innerHTML = minY;
+			document.getElementById('yVal').min = 0;
 			document.getElementById('yVal').max = maxY;
 			document.getElementById('yVal').step = maxY / 10;
 			document.getElementById('yVal').value= maxY / 2;
@@ -182,6 +194,10 @@
 		dropDown.on("change", function() {
 			selected_color = d3.event.target.value;
 			niceNameColor = getNiceName(selected_color);
+			maxColor = d3.max(data, function(d) { return d[selected_color]});
+			document.getElementById("ColorMax").innerHTML = maxColor;
+			minColor = d3.min(data, function(d) { return d[selected_color]});
+			document.getElementById("ColorMin").innerHTML = minColor;
 			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 		});
 
@@ -234,10 +250,10 @@
 		.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
     xScale.domain(d3.extent(data, function(d){
-				return d[selected_x];
+					return d[selected_x]
 		})).nice();
 		yScale.domain(d3.extent(data, function(d){
-				return d[selected_y];
+					return d[selected_y]
 		})).nice();
 
     svg.style("background-color", "#515A5A");
@@ -264,16 +280,24 @@
 			.attr('class', 'bubble')
 			.attr('cx', function(d){
 				if (d[selected_x] <= maxX) {
-						return xScale(d[selected_x])
+						return xScale(d[selected_x]);
 				}
 			})
 			.attr('cy', function(d){
 				if (d[selected_y] <= maxY) {
-						return xScale(d[selected_y])
+						return yScale(d[selected_y]);
 				}
 			})
 			.attr('r', 5)
-			.style('fill', function(d){ return d3.interpolateBuPu(d[selected_color])});
+			.style('fill', function(d){
+				// grab max color value to create color gradient scale
+				maxColor = d3.max(data, function(d) { return d[selected_color]});
+				minColor = d3.min(data, function(d) { return d[selected_color]});
+				// get ratio to pass to interpolateBuPu to get color value between 0 and 1 for gradient
+				colorRange = (maxColor - minColor)
+				// returns color value on chosen blue/purple spectrum
+				return d3.interpolateBuPu(d[selected_color] / colorRange);
+			});
 
     // hover tooltip
 		bubble.append('title')
@@ -292,7 +316,7 @@
 				if (selected_color =='chas') {
 						colorval = translateDummyVar(d, selected_color);
 				}
-        var tooltip = "X: " + niceNameX + " = " + xval + "\nY: " + niceNameY + " = " + yval + "\nColor: " + niceNameColor + " = " + colorval
+        var tooltip = "X: " + niceNameX + " = " + xval + "\nY: " + niceNameY + " = " + yval + "\nColor: " + niceNameColor + " = " + colorval;
 				return  tooltip;
 			});
 
@@ -393,21 +417,23 @@
 					<select id="dropdownY"></select>
 					<p class ="interactionLabel">Choose Color variable </p>
 					<select id="dropdownColor"></select>
+					<img class="colorpic" src="./BuPuu.png" width=130px height=20px> <img/>
+					<p id="ColorMin"></p><p> to </p><p id="ColorMax"></p>
 				</div>
 			</div>
 
 			<div class="box">
 				<div>
-					<!-- slider from online - attempt3 -->
+					<!-- max range slider -->
 					<p class ="interactionLabel">Filter X values</p>
 					<p id="selectedXMax"></p>
 					<input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
-					<p> 0 to </p><p id="XMax"></p>
+					<p id="XMin"></p><p> to </p><p id="XMax"></p>
 
 					<p class ="interactionLabel">Filter Y values</p>
 					<p id="selectedYMax"></p>
 					<input id="yVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
-					<p> 0 to </p><p id="YMax"></p>
+					<p id="YMin"></p><p> to </p><p id="YMax"></p>
 
 				</div>
 			</div>
