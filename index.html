@@ -24,9 +24,9 @@
 
 	// layout based on: http://blockbuilder.org/Jverma/076377dd0125b1a508621441752735fc
 
-	var margin = {top: 30, right: 50, bottom: 40, left:40};
-	var width = 700 - margin.left - margin.right;
-	var height = 575 - margin.top - margin.bottom;
+	var margin = {top: 40, right: 50, bottom: 40, left:50};
+	var width = +700 - margin.left - margin.right;
+	var height = +575 - margin.top - margin.bottom;
 
 	var svg = d3.select('body')
 		.append('svg')
@@ -36,9 +36,9 @@
 		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
 	var xScale = d3.scaleLinear()
-		.range([0, width]);
+		.range([0, width - 10]);
 	var yScale = d3.scaleLinear()
-		.range([height, 0]);
+		.range([height, 10]);
 	var radius = d3.scaleSqrt()
 		.range([2,5]);
 	var xAxis = d3.axisBottom()
@@ -112,6 +112,8 @@
 		var niceNameColor = getNiceName(selected_color);
 		var maxX = d3.max(data, function(d) { return d[selected_x]});
 		var maxY = d3.max(data, function(d) { return d[selected_y]});
+		document.getElementById("XMax").innerHTML = maxX;
+		document.getElementById("YMax").innerHTML = maxY;
 		document.getElementById('xVal').min = 0;
 		document.getElementById('xVal').max = maxX;
 		document.getElementById('xVal').step = maxX / 10;
@@ -136,6 +138,8 @@
 		dropDown.on("change", function() {
 			selected_x = d3.event.target.value;
 			niceNameX = getNiceName(selected_x);
+			maxX = d3.max(data, function(d) { return d[selected_x]});
+			document.getElementById("XMax").innerHTML = maxX;
 			document.getElementById('xVal').min = 0;
 			document.getElementById('xVal').max = maxX;
 			document.getElementById('xVal').step = maxX / 10;
@@ -157,6 +161,8 @@
 			selected_y = d3.event.target.value;
 			niceNameY = getNiceName(selected_y);
 			document.getElementById('yVal').min = 0;
+			maxY = d3.max(data, function(d) { return d[selected_y]});
+			document.getElementById("YMax").innerHTML = maxY;
 			document.getElementById('yVal').max = maxY;
 			document.getElementById('yVal').step = maxY / 10;
 			document.getElementById('yVal').value= maxY / 2;
@@ -179,28 +185,38 @@
 			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
 		});
 
-		// reverse x and y axes when Reverse Axis is used (button)
-		function reverse(selected_x, selected_y, selected_color) {
-			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
-		}
+
 		var button = d3.select("#reverse");
 		button.on("click", function() {
-			reverse(selected_y, selected_x, selected_color, maxX, maxY);
+			updateGraph(selected_y, selected_x, selected_color, maxY, maxX);
 			var temp = selected_y;
 			selected_y = selected_x;
 			selected_x = temp;
+			var tempMax = maxY;
+			maxY = maxX;
+			maxX = tempMax;
+			document.getElementById('xVal').min = 0;
+			document.getElementById('xVal').max = maxX;
+			document.getElementById('xVal').step = maxX / 10;
+			document.getElementById('xVal').value = maxX / 2;
+			document.getElementById('yVal').min = 0;
+			document.getElementById('yVal').max = maxY;
+			document.getElementById('yVal').step = maxY / 10;
+			document.getElementById('yVal').value= maxY / 2;
 		});
 
 		// update x-axis when x filter is changed (slider)
 		document.getElementById('xVal').addEventListener('change', function() {
 			maxX = this.value;
-			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
+			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
+			document.getElementById("selectedXMax").innerHTML = maxX;
 		});
 
 		// update y-axis when y filter is changed (slider)
 		document.getElementById('yVal').addEventListener('change', function() {
 			maxY = this.value;
-			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
+			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
+			document.getElementById("selectedYMax").innerHTML = maxY;
 		});
 
   // plot graph using selected x, y and color variables, and selected x and y value filters
@@ -248,10 +264,10 @@
 			.data(data)
 			.enter().append('circle')
 			.attr('class', 'bubble')
-			.attr('cx', function(d){return xScale(d[selected_x]);})
-			.attr('cy', function(d){ return yScale(d[selected_y]); })
+			.attr('cx', function(d){return xScale(d[selected_x])})
+			.attr('cy', function(d){ return yScale(d[selected_y])})
 			.attr('r', 5)
-			.style('fill', function(d){ return d3.interpolateBuPu(d[selected_color]) });
+			.style('fill', function(d){ return d3.interpolateBuPu(d[selected_color])});
 
     // hover tooltip
 		bubble.append('title')
@@ -283,48 +299,48 @@
         .text(niceNameX + " vs. " + niceNameY);
 		// add label for x-axis and y-axis
 		svg.append('text')
-			.attr('x', 5)
-			.attr('y', 15)
+			.attr('x', 0)
+			.attr('y', 0)
 			.attr('class', 'label')
       .text(selected_x);
 		svg.append('text')
-			.attr('x', width)
-			.attr('y', height - 5)
+			.attr('x', width + 45)
+			.attr('y', height)
 			.attr('text-anchor', 'end')
 			.attr('class', 'label')
 			.text(selected_y);
 
     // ??????? doesnt work
     // add legend
-		var legend = svg.selectAll('legend')
-			.data(color.domain())
-			.enter().append('g')
-			.attr('class', 'legend')
-			.attr('transform', function(d,i){ return 'translate(0,' + i * 20 + ')'; });
-		// give x value equal to the legend elements.
-		// no need to define a function for fill, this is automatically fill by color.
-		legend.append('rect')
-			.attr('x', width)
-			.attr('width', 18)
-			.attr('height', 18)
-			.style('fill', color);
-		// add text to the legend elements.
-		// rects are defined at x value equal to width, we define text at width - 6, this will print name of the legends before the rects.
-		legend.append('text')
-			.attr('x', width - 6)
-			.attr('y', 9)
-			.attr('dy', '.35em')
-			.style('text-anchor', 'end')
-			.text(function(d){ return d; });
-		// d3 has a filter fnction similar to filter function in JS. Here it is used to filter d3 components.
-		legend.on('click', function(type){
-			d3.selectAll('.bubble')
-				.style('opacity', 0.15)
-				.filter(function(d){
-					return d.chas == type;
-				})
-				.style('opacity', 1);
-		})
+	// 	var legend = svg.selectAll('legend')
+	// 		.data(color.domain())
+	// 		.enter().append('g')
+	// 		.attr('class', 'legend')
+	// 		.attr('transform', function(d,i){ return 'translate(0,' + i * 20 + ')'; });
+	// 	// give x value equal to the legend elements.
+	// 	// no need to define a function for fill, this is automatically fill by color.
+	// 	legend.append('rect')
+	// 		.attr('x', width)
+	// 		.attr('width', 18)
+	// 		.attr('height', 18)
+	// 		.style('fill', color);
+	// 	// add text to the legend elements.
+	// 	// rects are defined at x value equal to width, we define text at width - 6, this will print name of the legends before the rects.
+	// 	legend.append('text')
+	// 		.attr('x', width - 6)
+	// 		.attr('y', 9)
+	// 		.attr('dy', '.35em')
+	// 		.style('text-anchor', 'end')
+	// 		.text(function(d){ return d; });
+	// 	// d3 has a filter fnction similar to filter function in JS. Here it is used to filter d3 components.
+	// 	legend.on('click', function(type){
+	// 		d3.selectAll('.bubble')
+	// 			.style('opacity', 0.15)
+	// 			.filter(function(d){
+	// 				return d.chas == type;
+	// 			})
+	// 			.style('opacity', 1);
+	// 	})
 	}
 
   	// //??????????????
@@ -374,11 +390,16 @@
 			<div class="box">
 				<div>
 					<!-- slider from online - attempt3 -->
-					<p>filter X</p>
+					<p>Filter X values</p>
+					<p id="selectedXMax"></p>
 					<input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
+					<p> 0 to </p><p id="XMax"></p>
 
-					<p>filter Y</p>
+					<p>Filter Y values</p>
+					<p id="selectedYMax"></p>
 					<input id="yVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
+					<p> 0 to </p><p id="YMax"></p>
+
 				</div>
 			</div>
 
