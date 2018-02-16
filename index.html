@@ -234,14 +234,10 @@
 		.append('g')
 			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
     xScale.domain(d3.extent(data, function(d){
-			if (d[selected_x] < maxX) {
 				return d[selected_x];
-			}
 		})).nice();
 		yScale.domain(d3.extent(data, function(d){
-			if (d[selected_y] < maxY) {
 				return d[selected_y];
-			}
 		})).nice();
 
     svg.style("background-color", "#515A5A");
@@ -266,8 +262,16 @@
 			.data(data)
 			.enter().append('circle')
 			.attr('class', 'bubble')
-			.attr('cx', function(d){return xScale(d[selected_x])})
-			.attr('cy', function(d){ return yScale(d[selected_y])})
+			.attr('cx', function(d){
+				if (d[selected_x] <= maxX) {
+						return xScale(d[selected_x])
+				}
+			})
+			.attr('cy', function(d){
+				if (d[selected_y] <= maxY) {
+						return xScale(d[selected_y])
+				}
+			})
 			.attr('r', 5)
 			.style('fill', function(d){ return d3.interpolateBuPu(d[selected_color])});
 
