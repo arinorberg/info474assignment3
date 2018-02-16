@@ -30,11 +30,13 @@ body{
   font-family: arial, sans;
   background-color: #9E9E9E;
 }
+
 .well {
   padding: 40px;
   width: 400px;
 }
-.sliderlabels ul {
+
+/* .sliderlabels ul {
   display: flex;
   justify-content: space-between;
   width: 100%;
@@ -42,10 +44,12 @@ body{
 }
 .sliderlabels li {
   display: inline;
-}
+} */
+
 .label{
   font-size: 15px;
 }
+
 .legend text,
 .axis text {
   font-size: 13px;
@@ -111,4 +115,16 @@ circle.bubble:hover {
   stroke: #000;
   stroke-opacity: 0.5;
   stroke-width: 1.25px;
+}
+
+/* idk how to make css work :( */
+.interactionLabel {
+  font-size: 20px;
+  font-weight: bold;
+}
+#selectedXMax {
+  font-weight: bold;
+}
+#selectedYMax {
+  font-weight: bold;
 }

@@ -195,6 +195,8 @@
 			var tempMax = maxY;
 			maxY = maxX;
 			maxX = tempMax;
+			niceNameX = getNiceName(selected_x);
+			niceNameY = getNiceName(selected_y);
 			document.getElementById('xVal').min = 0;
 			document.getElementById('xVal').max = maxX;
 			document.getElementById('xVal').step = maxX / 10;
@@ -297,18 +299,21 @@
         .attr("text-anchor", "middle")
         .style("font-size", "16px")
         .text(niceNameX + " vs. " + niceNameY);
-		// add label for x-axis and y-axis
+
+		// add y axis label
 		svg.append('text')
 			.attr('x', 0)
 			.attr('y', 0)
 			.attr('class', 'label')
-      .text(selected_x);
+      .text(selected_y);
+
+		// add x axis label
 		svg.append('text')
 			.attr('x', width + 45)
 			.attr('y', height)
 			.attr('text-anchor', 'end')
 			.attr('class', 'label')
-			.text(selected_y);
+			.text(selected_x);
 
     // ??????? doesnt work
     // add legend
@@ -378,11 +383,11 @@
 			<!-- dropdowns -->
 			<div class="box">
 				<div class="dropdowns">
-					<p>Choose X variable</p>
+					<p class ="interactionLabel">Choose X variable</p>
 					<select id="dropdownX"></select>
-					<p>Choose Y variable</p>
+					<p class ="interactionLabel">Choose Y variable</p>
 					<select id="dropdownY"></select>
-					<p>Choose Color variable </p>
+					<p class ="interactionLabel">Choose Color variable </p>
 					<select id="dropdownColor"></select>
 				</div>
 			</div>
@@ -390,12 +395,12 @@
 			<div class="box">
 				<div>
 					<!-- slider from online - attempt3 -->
-					<p>Filter X values</p>
+					<p class ="interactionLabel">Filter X values</p>
 					<p id="selectedXMax"></p>
 					<input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
 					<p> 0 to </p><p id="XMax"></p>
 
-					<p>Filter Y values</p>
+					<p class ="interactionLabel">Filter Y values</p>
 					<p id="selectedYMax"></p>
 					<input id="yVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
 					<p> 0 to </p><p id="YMax"></p>
