@@ -1,396 +1,402 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<title>Assignment 3</title>
-	<script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
-	<link rel="stylesheet" type="text/css" href="./css/style.css"></link>
-</head>
-<body>
+   <head>
+      <meta charset="UTF-8">
+      <title>Assignment 3</title>
+      <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
+      <link rel="stylesheet" type="text/css" href="./css/style.css">
+      </link>
+   </head>
+   <body>
 
-	<!-- D3 -->
-  <script src="https://d3js.org/d3-color.v1.min.js"></script>
-  <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
-  <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+      <!-- D3 -->
+      <script src="https://d3js.org/d3-color.v1.min.js"></script>
+      <script src="https://d3js.org/d3-interpolate.v1.min.js"></script>
+      <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+      <!-- jQuery -->
+      <script src="./js/jquery-3.3.1.min.js"></script>
+      <script src="./js/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
 
-	<!-- jQuery -->
-	<script src="./js/jquery-3.3.1.min.js"></script>
-	<script src="./js/jquery-ui-1.12.1.custom/jquery-ui.min.js"></script>
-	<!-- <script type="text/javascript" src="http//code.jquery.com/jquery-1.10.2.js"></script>
-	<script type="text/javascript" src="http//code.jquery.com/ui/1.11.1/jqueryui.js"></script> -->
+      <script>
+         // layout based on: http://blockbuilder.org/Jverma/076377dd0125b1a508621441752735fc
+         var margin = {top: 40, right: 50, bottom: 40, left:50};
+         var width = +700 - margin.left - margin.right;
+         var height = +575 - margin.top - margin.bottom;
+         var svg = d3.select('body')
+         	.append('svg')
+         	.attr('width', width + margin.left + margin.right)
+         	.attr('height', height + margin.top + margin.bottom)
+         .append('g')
+         	.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+         var xScale = d3.scaleLinear()
+         	.range([0, width - 10]);
+         var yScale = d3.scaleLinear()
+         	.range([height, 10]);
+         var radius = d3.scaleSqrt()
+         	.range([2,5]);
+         var xAxis = d3.axisBottom()
+         	.scale(xScale);
+         var yAxis = d3.axisLeft()
+         	.scale(yScale);
+         var color = d3.scaleOrdinal(d3.schemeCategory20);
+          // read in data
+         d3.csv('./data/Boston.csv', function(error, data){
+         	var variables = d3.keys(data[0]);
+         	data.forEach(function(d){
+             d.crim = +d.crim;
+         		 d.zn = +d.zn;
+         		 d.indus = +d.indus;
+         		 d.chas = +d.chas;
+         		 d.nox = +d.nox;
+         		 d.rm = +d.rm
+         		 d.age = +d.age;
+         		 d.dis = +d.dis;
+         		 d.rad= +d.rad;
+         		 d.tax = +d.tax;
+         		 d.ptratio =+d.ptratio;
+         		 d.b = +d.b;
+             d.medv = +d.medv;
+         	});
+         	var dropdown_options = variables;
+         	// get nice name of variable
+         	function getNiceName(selected) {
+         		var niceName = selected;
+         		if (selected == "crim") {
+         			niceName = "Per Capita Crime Rate"
+         		} else if (selected == "zn") {
+         			niceName = "Proportion of Residential Land Zoned for Lots"
+         		} else if (selected == "indus") {
+         			niceName = "Proportion of Non-retail Business Acres"
+         		} else if (selected == "chas") {
+         			niceName = "Tract Bounds the Charles River"
+         		} else if (selected == "nox") {
+         			niceName = "Nitric Oxides Concentration Parts (per 10 million)"
+         		} else if (selected == "rm") {
+         			niceName = "Average Number of Rooms per Dwelling"
+         		} else if (selected == "age") {
+         			niceName = "Proportion of Owner-Occupied Units Built Prior to 1940"
+         		} else if (selected == "dis") {
+         			niceName = "Weighted Distances to Five Boston Employment Centres"
+         		} else if (selected == "rad") {
+         			niceName = "Index of Accessibility to Radial Highways"
+         		} else if (selected == "tax") {
+         			niceName = "Full-value Property-Tax Rate per $10,000"
+         		} else if (selected == "ptratio") {
+         			niceName = "Pupil-teacher Ratio"
+         		} else if (selected == "B") {
+         			niceName = "Proportion of Blacks"
+         		} else if (selected == "lstat") {
+         			niceName = "% Lower Status of the Population"
+         		} else {
+         			niceName = "Median Value of Owner-Occupied Homes ($1000's)"
+         		}
+         		return niceName;
+         	}
+         	// default
+         	var selected_x = "crim";
+         	var selected_y = "medv";
+         	var selected_color = "chas";
+         	var niceNameX = getNiceName(selected_x);
+         	var niceNameY = getNiceName(selected_y);
+         	var niceNameColor = getNiceName(selected_color);
+         	var maxX = d3.max(data, function(d) { return d[selected_x]});
+         	var minX= d3.min(data, function(d) { return d[selected_x]});
+         	var maxY = d3.max(data, function(d) { return d[selected_y]});
+         	var minY= d3.min(data, function(d) { return d[selected_y]});
+         	var filterX = maxX;
+         	var filterY = maxY;
+         	var maxColor = d3.max(data, function(d) { return d[selected_color]});
+         	var minColor = d3.min(data, function(d) { return d[selected_color]});
+         	var rangeX = maxX - minX;
+         	var rangeY = maxY - minY;
+         	document.getElementById("XMax").innerHTML = maxX;
+         	document.getElementById("YMax").innerHTML = maxY;
+         	document.getElementById("ColorMax").innerHTML = maxColor;
+         	document.getElementById("ColorMin").innerHTML = minColor;
+         	document.getElementById("XMin").innerHTML = minX;
+         	document.getElementById("YMin").innerHTML = minY;
+         	document.getElementById('xVal').min = minX;
+         	document.getElementById('xVal').max = maxX;
+         	document.getElementById('xVal').step = rangeX / 10;
+         	document.getElementById('xVal').value = filterX;
+         	document.getElementById('yVal').min = minY;
+         	document.getElementById('yVal').max = maxY;
+         	document.getElementById('yVal').step = rangeY / 10;
+         	document.getElementById('yVal').value= filterY;
+         	updateGraph(selected_x, selected_y, selected_color, filterX, filterY);
+         	// update x-axis when new X variable is chosen (dropdown)
+         	d3.select("#dropdownX")
+         	.selectAll("option")
+         	.data(dropdown_options)
+         	.enter()
+         	.append("option")
+         	.attr("value", function(option) { return option; })
+         	.property("selected", function(d){ return d === selected_x})
+         	.text(function(option) { return option; });
+         	var dropDown = d3.select("#dropdownX");
+         	dropDown.on("change", function() {
+         		selected_x = d3.event.target.value;
+         		niceNameX = getNiceName(selected_x);
+         		maxX = d3.max(data, function(d) { return d[selected_x]});
+         		minX = d3.min(data, function(d) { return d[selected_x]});
+         		filterX = maxX;
+         		rangeX = maxX - minX;
+         		document.getElementById("XMax").innerHTML = maxX;
+         		document.getElementById("XMin").innerHTML = minX;
+         		document.getElementById('xVal').min = minX;
+         		document.getElementById('xVal').max = maxX;
+         		document.getElementById('xVal').step = rangeX  / 10;
+         		document.getElementById('xVal').value = filterX;
+         		document.getElementById("selectedXMax").innerHTML = filterX;
+         		updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
+         	});
+         	// update y-axis when new Y variable is chosen (dropdown)
+         	d3.select("#dropdownY")
+         	.selectAll("option")
+         	.data(dropdown_options)
+         	.enter()
+         	.append("option")
+         	.attr("value", function(option) { return option; })
+         	.property("selected", function(d){ return d === selected_y})
+         	.text(function(option) { return option; });
+         	var dropDown = d3.select("#dropdownY");
+         	dropDown.on("change", function() {
+         		selected_y = d3.event.target.value;
+         		niceNameY = getNiceName(selected_y);
+         		maxY = d3.max(data, function(d) { return d[selected_y]});
+         		minY = d3.min(data, function(d) { return d[selected_y]});
+         		filterY = maxY;
+         		rangeY = maxY - minY;
+         		document.getElementById("YMax").innerHTML = maxY;
+         		document.getElementById("YMin").innerHTML = minY;
+         		document.getElementById('yVal').min = minY;
+         		document.getElementById('yVal').max = maxY;
+         		document.getElementById('yVal').step = rangeY / 10;
+         		document.getElementById('yVal').value = filterY;
+         		document.getElementById("selectedYMax").innerHTML = filterY;
+         		updateGraph(selected_x, selected_y, selected_color, filterX, filterY);
+         	});
+         	// update color encoding when new color variable is chosen (dropdown)
+         	d3.select("#dropdownColor")
+         	.selectAll("option")
+         	.data(dropdown_options)
+         	.enter()
+         	.append("option")
+         	.attr("value", function(option) { return option; })
+         	.property("selected", function(d){ return d === selected_color; })
+         	.text(function(option) { return option; });
+         	var dropDown = d3.select("#dropdownColor");
+         	dropDown.on("change", function() {
+         		selected_color = d3.event.target.value;
+         		niceNameColor = getNiceName(selected_color);
+         		maxColor = d3.max(data, function(d) { return d[selected_color]});
+         		minColor = d3.min(data, function(d) { return d[selected_color]});
+         		document.getElementById("ColorMax").innerHTML = maxColor;
+         		document.getElementById("ColorMin").innerHTML = minColor;
+         		updateGraph(selected_x, selected_y, selected_color, filterX, filterY);
+         	});
+         	var button = d3.select("#reverse");
+         	button.on("click", function() {
+         		var tempVar = selected_y;
+         		selected_y = selected_x;
+         		selected_x = tempVar;
+         		var tempMax = maxY;
+         		maxY = maxX;
+         		maxX = tempMax;
+         		var tempMin = minY;
+         		minY = minX;
+         		minX = tempMin;
+         		var tempFilter = filterY;
+         		filterY = filterX;
+         		filterX = tempFilter;
+         		niceNameX = getNiceName(selected_x);
+         		niceNameY = getNiceName(selected_y);
+         		document.getElementById("XMax").innerHTML = maxX;
+         		document.getElementById("YMax").innerHTML = maxY;
+         		document.getElementById("XMin").innerHTML = minX;
+         		document.getElementById("YMin").innerHTML = minY;
+         		document.getElementById('xVal').min = minX;
+         		document.getElementById('xVal').max = maxX;
+         		document.getElementById('xVal').step = rangeX / 10;
+         		document.getElementById('xVal').value = filterX;
+         		document.getElementById('yVal').min = minY;
+         		document.getElementById('yVal').max = maxY;
+         		document.getElementById('yVal').step = rangeY / 10;
+         		document.getElementById('yVal').value = filterY;
+         		document.getElementById("selectedYMax").innerHTML = filterY;
+         		document.getElementById("selectedXMax").innerHTML = filterX;
+         		// dropdown selections need to update when axes switch
+         		// d3.select("#dropdownX").property("selected", function(d){ return d === selected_x})
+         		// d3.select("#dropdownY").property("selected", function(d){ return d === selected_y})
+         		// ^^^didn't work????
+         		updateGraph(selected_x, selected_y, selected_color, filterX, filterY);
 
+         	});
+         	// update x-axis when x filter is changed (slider)
+         	document.getElementById('xVal').addEventListener('change', function() {
+         		filterX = this.value;
+         		document.getElementById("selectedXMax").innerHTML = filterX;
+         		updateGraph(selected_x, selected_y, selected_color, filterX, filterY);
+         	});
+         	// update y-axis when y filter is changed (slider)
+         	document.getElementById('yVal').addEventListener('change', function() {
+         		filterY = this.value;
+         		document.getElementById("selectedYMax").innerHTML = filterY;
+         		updateGraph(selected_x, selected_y, selected_color, filterX, filterY);
+         	});
+          // plot graph using selected x, y and color variables, and selected x and y value filters
+         function updateGraph(selected_x, selected_y, selected_color, maxX, maxY) {
+         	console.log("x: " + selected_x)
+         	console.log("y: " + selected_y)
+         	console.log("color: " + selected_color)
+         	d3.select("svg").remove();
+         	var svg = d3.select('body')
+         		.append('svg')
+         		.attr('width', width + margin.left + margin.right)
+         		.attr('height', height + margin.top + margin.bottom)
+         	.append('g')
+         		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+            xScale.domain(d3.extent(data, function(d){
+         				if (d[selected_x] <= filterX) {
+         						return d[selected_x];
+         				}
+         	})).nice();
+         	yScale.domain(d3.extent(data, function(d){
+         		if (d[selected_y] <= filterY) {
+         				return d[selected_y];
+         		}
+         	})).nice();
+            svg.style("background-color", "#515A5A");
+         	svg.append('g')
+         		.attr('transform', 'translate(0,' + height + ')')
+         		.attr('class', 'x axis')
+         		.call(xAxis);
+         	svg.append('g')
+         		.attr('transform', 'translate(0,0)')
+         		.attr('class', 'y axis')
+         		.call(yAxis);
 
-	<script>
+            // add points to graph
+         	var bubble = svg.selectAll('.bubble')
+         		.data(data)
+         		.enter().append('circle')
+         		.attr('class', 'bubble')
+         		.attr('cx', function(d){
+         			if (d[selected_x] <= filterX) {
+         					return xScale(d[selected_x]);
+         			}
+         		})
+         		.attr('cy', function(d){
+         			if (d[selected_y] <= filterY) {
+         					return yScale(d[selected_y]);
+         			}
+         		})
+         		.attr('r', 5)
+         		.style('fill', function(d){
+         			// grab max and min color value to create color gradient scale
+         			maxColor = d3.max(data, function(d) { return d[selected_color]});
+         			minColor = d3.min(data, function(d) { return d[selected_color]});
+         			// get ratio to pass to interpolateBuPu to get color value between 0 and 1 for gradient
+         			colorRange = (maxColor - minColor)
+         			// returns color value on chosen blue/purple spectrum
+         			return d3.interpolateBuPu(d[selected_color] / colorRange);
+         		});
 
-	// layout based on: http://blockbuilder.org/Jverma/076377dd0125b1a508621441752735fc
+         		function translateDummyVar (d, selected) {
+         				 if (d[selected] == 0) {
+         					 return "no"
+         				 } else {
+         					 return "yes"
+         				 }
+         		}
+            // hover tooltip
+         	bubble.append('title')
+         		.attr('x', function(d){ return radius(1); })
+         		.text(function(d){
+                // translate dummy variables for readability
+         			var xval  = d[selected_x];
+         			var yval  = d[selected_y];
+         			var colorval  = d[selected_color];
+         			if (selected_x =='chas') {
+         					xval = translateDummyVar(d, selected_x);
+         			}
+         			if (selected_y =='chas') {
+         					yval = translateDummyVar(d, selected_y);
+         			}
+         			if (selected_color =='chas') {
+         					colorval = translateDummyVar(d, selected_color);
+         			}
+                var tooltip = "X: " + niceNameX + " = " + xval + "\nY: " + niceNameY + " = " + yval + "\nColor: " + niceNameColor + " = " + colorval;
+         			return  tooltip;
+         		});
+            // add title to graph
+         	svg.append("text")
+                .attr("x", (width / 2))
+                .attr("y", 0 - (margin.top / 2))
+                .attr("text-anchor", "middle")
+                .style("font-size", "16px")
+                .text(niceNameX + " vs. " + niceNameY);
+         	// add y axis label
+         	svg.append('text')
+         		.attr('x', 0)
+         		.attr('y', 0)
+         		.attr('class', 'label')
+              .text(selected_y);
+         	// add x axis label
+         	svg.append('text')
+         		.attr('x', width + 45)
+         		.attr('y', height)
+         		.attr('text-anchor', 'end')
+         		.attr('class', 'label')
+         		.text(selected_x);
+         }
+         })
 
-	var margin = {top: 40, right: 50, bottom: 40, left:50};
-	var width = +700 - margin.left - margin.right;
-	var height = +575 - margin.top - margin.bottom;
+      </script>
 
-	var svg = d3.select('body')
-		.append('svg')
-		.attr('width', width + margin.left + margin.right)
-		.attr('height', height + margin.top + margin.bottom)
-	.append('g')
-		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-
-	var xScale = d3.scaleLinear()
-		.range([0, width - 10]);
-	var yScale = d3.scaleLinear()
-		.range([height, 10]);
-	var radius = d3.scaleSqrt()
-		.range([2,5]);
-	var xAxis = d3.axisBottom()
-		.scale(xScale);
-	var yAxis = d3.axisLeft()
-		.scale(yScale);
-	var color = d3.scaleOrdinal(d3.schemeCategory20);
-
-  // read in data
-	d3.csv('./data/Boston.csv', function(error, data){
-		var variables = d3.keys(data[0]);
-		data.forEach(function(d){
-       d.crim = +d.crim;
-			 d.zn = +d.zn;
-			 d.indus = +d.indus;
-			 d.chas = +d.chas;
-			 d.nox = +d.nox;
-			 d.rm = +d.rm
-			 d.age = +d.age;
-			 d.dis = +d.dis;
-			 d.rad= +d.rad;
-			 d.tax = +d.tax;
-			 d.ptratio =+d.ptratio;
-			 d.b = +d.b;
-       d.medv = +d.medv;
-		});
-		var dropdown_options = variables;
-
-
-		// get nice name of variable
-		function getNiceName(selected) {
-			var niceName = selected;
-			if (selected == "crim") {
-				niceName = "Per Capita Crime Rate"
-			} else if (selected == "zn") {
-				niceName = "Proportion of Residential Land Zoned for Lots"
-			} else if (selected == "indus") {
-				niceName = "Proportion of Non-retail Business Acres"
-			} else if (selected == "chas") {
-				niceName = "Tract Bounds the Charles River"
-			} else if (selected == "nox") {
-				niceName = "Nitric Oxides Concentration Parts (per 10 million)"
-			} else if (selected == "rm") {
-				niceName = "Average Number of Rooms per Dwelling"
-			} else if (selected == "age") {
-				niceName = "Proportion of Owner-Occupied Units Built Prior to 1940"
-			} else if (selected == "dis") {
-				niceName = "Weighted Distances to Five Boston Employment Centres"
-			} else if (selected == "rad") {
-				niceName = "Index of Accessibility to Radial Highways"
-			} else if (selected == "tax") {
-				niceName = "Full-value Property-Tax Rate per $10,000"
-			} else if (selected == "ptratio") {
-				niceName = "Pupil-teacher Ratio"
-			} else if (selected == "B") {
-				niceName = "Proportion of Blacks"
-			} else if (selected == "lstat") {
-				niceName = "% Lower Status of the Population"
-			} else {
-				niceName = "Median Value of Owner-Occupied Homes ($1000's)"
-			}
-			return niceName;
-		}
-
-		// default
-		var selected_x = "crim";
-		var selected_y = "medv";
-		var selected_color = "chas";
-		var niceNameX = getNiceName(selected_x);
-		var niceNameY = getNiceName(selected_y);
-		var niceNameColor = getNiceName(selected_color);
-		var maxX = d3.max(data, function(d) { return d[selected_x]});
-		var minX= d3.min(data, function(d) { return d[selected_x]});
-		var maxY = d3.max(data, function(d) { return d[selected_y]});
-		var minY= d3.min(data, function(d) { return d[selected_x]});
-		var maxColor = d3.max(data, function(d) { return d[selected_color]});
-		var minColor = d3.min(data, function(d) { return d[selected_color]});
-		document.getElementById("XMax").innerHTML = maxX;
-		document.getElementById("YMax").innerHTML = maxY;
-		document.getElementById("ColorMax").innerHTML = maxColor;
-		document.getElementById("ColorMin").innerHTML = minColor;
-		document.getElementById("XMin").innerHTML = minX;
-		document.getElementById("YMin").innerHTML = minY;
-		document.getElementById('xVal').min = 0;
-		document.getElementById('xVal').max = maxX;
-		document.getElementById('xVal').step = maxX / 10;
-		document.getElementById('xVal').value = maxX / 2;
-		document.getElementById('yVal').min = 0;
-		document.getElementById('yVal').max = maxY;
-		document.getElementById('yVal').step = maxY / 10;
-		document.getElementById('yVal').value= maxY / 2;
-		updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
-
-
-		// update x-axis when new X variable is chosen (dropdown)
-		d3.select("#dropdownX")
-		.selectAll("option")
-		.data(dropdown_options)
-		.enter()
-		.append("option")
-		.attr("value", function(option) { return option; })
-		.property("selected", function(d){ return d === selected_x; })
-		.text(function(option) { return option; });
-		var dropDown = d3.select("#dropdownX");
-		dropDown.on("change", function() {
-			selected_x = d3.event.target.value;
-			niceNameX = getNiceName(selected_x);
-			maxX = d3.max(data, function(d) { return d[selected_x]});
-			minX = d3.min(data, function(d) { return d[selected_x]});
-			document.getElementById("XMax").innerHTML = maxX;
-			document.getElementById("XMin").innerHTML = minX;
-			document.getElementById('xVal').min = 0;
-			document.getElementById('xVal').max = maxX;
-			document.getElementById('xVal').step = maxX / 10;
-			document.getElementById('xVal').value = maxX / 2;
-			updateGraph(selected_x, selected_y, selected_color, maxX, maxY)
-		});
-
-		// update y-axis when new Y variable is chosen (dropdown)
-		d3.select("#dropdownY")
-		.selectAll("option")
-		.data(dropdown_options)
-		.enter()
-		.append("option")
-		.attr("value", function(option) { return option; })
-		.property("selected", function(d){ return d === selected_y; })
-		.text(function(option) { return option; });
-		var dropDown = d3.select("#dropdownY");
-		dropDown.on("change", function() {
-			selected_y = d3.event.target.value;
-			niceNameY = getNiceName(selected_y);
-			maxY = d3.max(data, function(d) { return d[selected_y]});
-			minY = d3.min(data, function(d) { return d[selected_y]});
-			document.getElementById("YMax").innerHTML = maxY;
-			document.getElementById("YMin").innerHTML = minY;
-			document.getElementById('yVal').min = 0;
-			document.getElementById('yVal').max = maxY;
-			document.getElementById('yVal').step = maxY / 10;
-			document.getElementById('yVal').value= maxY / 2;
-			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
-		});
-
-		// update color encoding when new color variable is chosen (dropdown)
-		d3.select("#dropdownColor")
-		.selectAll("option")
-		.data(dropdown_options)
-		.enter()
-		.append("option")
-		.attr("value", function(option) { return option; })
-		.property("selected", function(d){ return d === selected_color; })
-		.text(function(option) { return option; });
-		var dropDown = d3.select("#dropdownColor");
-		dropDown.on("change", function() {
-			selected_color = d3.event.target.value;
-			niceNameColor = getNiceName(selected_color);
-			maxColor = d3.max(data, function(d) { return d[selected_color]});
-			document.getElementById("ColorMax").innerHTML = maxColor;
-			minColor = d3.min(data, function(d) { return d[selected_color]});
-			document.getElementById("ColorMin").innerHTML = minColor;
-			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
-		});
-
-
-		var button = d3.select("#reverse");
-		button.on("click", function() {
-			updateGraph(selected_y, selected_x, selected_color, maxY, maxX);
-			var temp = selected_y;
-			selected_y = selected_x;
-			selected_x = temp;
-			var tempMax = maxY;
-			maxY = maxX;
-			maxX = tempMax;
-			niceNameX = getNiceName(selected_x);
-			niceNameY = getNiceName(selected_y);
-			document.getElementById('xVal').min = 0;
-			document.getElementById('xVal').max = maxX;
-			document.getElementById('xVal').step = maxX / 10;
-			document.getElementById('xVal').value = maxX / 2;
-			document.getElementById('yVal').min = 0;
-			document.getElementById('yVal').max = maxY;
-			document.getElementById('yVal').step = maxY / 10;
-			document.getElementById('yVal').value= maxY / 2;
-		});
-
-		// update x-axis when x filter is changed (slider)
-		document.getElementById('xVal').addEventListener('change', function() {
-			maxX = this.value;
-			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
-			document.getElementById("selectedXMax").innerHTML = maxX;
-		});
-
-		// update y-axis when y filter is changed (slider)
-		document.getElementById('yVal').addEventListener('change', function() {
-			maxY = this.value;
-			updateGraph(selected_x, selected_y, selected_color, maxX, maxY);
-			document.getElementById("selectedYMax").innerHTML = maxY;
-		});
-
-  // plot graph using selected x, y and color variables, and selected x and y value filters
-	function updateGraph(selected_x, selected_y, selected_color, maxX, maxY) {
-		console.log("x: " + selected_x)
-		console.log("y: " + selected_y)
-		console.log("color: " + selected_color)
-		d3.select("svg").remove();
-		var svg = d3.select('body')
-			.append('svg')
-			.attr('width', width + margin.left + margin.right)
-			.attr('height', height + margin.top + margin.bottom)
-		.append('g')
-			.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-    xScale.domain(d3.extent(data, function(d){
-					return d[selected_x]
-		})).nice();
-		yScale.domain(d3.extent(data, function(d){
-					return d[selected_y]
-		})).nice();
-
-    svg.style("background-color", "#515A5A");
-		svg.append('g')
-			.attr('transform', 'translate(0,' + height + ')')
-			.attr('class', 'x axis')
-			.call(xAxis);
-		svg.append('g')
-			.attr('transform', 'translate(0,0)')
-			.attr('class', 'y axis')
-			.call(yAxis);
-
-		function translateDummyVar (d, selected) {
-				 if (d[selected] == 0) {
-					 return "no"
-				 } else {
-					 return "yes"
-				 }
-		}
-    // add points to graph
-		var bubble = svg.selectAll('.bubble')
-			.data(data)
-			.enter().append('circle')
-			.attr('class', 'bubble')
-			.attr('cx', function(d){
-				if (d[selected_x] <= maxX) {
-						return xScale(d[selected_x]);
-				}
-			})
-			.attr('cy', function(d){
-				if (d[selected_y] <= maxY) {
-						return yScale(d[selected_y]);
-				}
-			})
-			.attr('r', 5)
-			.style('fill', function(d){
-				// grab max color value to create color gradient scale
-				maxColor = d3.max(data, function(d) { return d[selected_color]});
-				minColor = d3.min(data, function(d) { return d[selected_color]});
-				// get ratio to pass to interpolateBuPu to get color value between 0 and 1 for gradient
-				colorRange = (maxColor - minColor)
-				// returns color value on chosen blue/purple spectrum
-				return d3.interpolateBuPu(d[selected_color] / colorRange);
-			});
-
-    // hover tooltip
-		bubble.append('title')
-			.attr('x', function(d){ return radius(1); })
-			.text(function(d){
-        // translate dummy variables for readability
-				var xval  = d[selected_x];
-				var yval  = d[selected_y];
-				var colorval  = d[selected_color];
-				if (selected_x =='chas') {
-						xval = translateDummyVar(d, selected_x);
-				}
-				if (selected_y =='chas') {
-						yval = translateDummyVar(d, selected_y);
-				}
-				if (selected_color =='chas') {
-						colorval = translateDummyVar(d, selected_color);
-				}
-        var tooltip = "X: " + niceNameX + " = " + xval + "\nY: " + niceNameY + " = " + yval + "\nColor: " + niceNameColor + " = " + colorval;
-				return  tooltip;
-			});
-
-    // add title to graph
-		svg.append("text")
-        .attr("x", (width / 2))
-        .attr("y", 0 - (margin.top / 2))
-        .attr("text-anchor", "middle")
-        .style("font-size", "16px")
-        .text(niceNameX + " vs. " + niceNameY);
-
-		// add y axis label
-		svg.append('text')
-			.attr('x', 0)
-			.attr('y', 0)
-			.attr('class', 'label')
-      .text(selected_y);
-
-		// add x axis label
-		svg.append('text')
-			.attr('x', width + 45)
-			.attr('y', height)
-			.attr('text-anchor', 'end')
-			.attr('class', 'label')
-			.text(selected_x);
-
-	}
-	})
-	
-</script>
-
-
-<div class="bigbox">
-	<div id="graph" class="box"></div>
-		<div class="box">
-			<!-- dropdowns -->
-			<div class="box">
-				<div class="dropdowns">
-					<p class ="interactionLabel">Choose X variable</p>
-					<select id="dropdownX"></select>
-					<p class ="interactionLabel">Choose Y variable</p>
-					<select id="dropdownY"></select>
-					<p class ="interactionLabel">Choose Color variable </p>
-					<select id="dropdownColor"></select>
-					<img class="colorpic" src="./BuPuu.png" width=130px height=20px> <img/>
-					<p id="ColorMin"></p><p> to </p><p id="ColorMax"></p>
-				</div>
-			</div>
-
-			<div class="box">
-				<div>
-					<!-- max range slider -->
-					<p class ="interactionLabel">Filter X values</p>
-					<p id="selectedXMax"></p>
-					<input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
-					<p id="XMin"></p><p> to </p><p id="XMax"></p>
-
-					<p class ="interactionLabel">Filter Y values</p>
-					<p id="selectedYMax"></p>
-					<input id="yVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
-					<p id="YMin"></p><p> to </p><p id="YMax"></p>
-
-				</div>
-			</div>
-
-			<div class="box">
-				<!-- reverse button-->
-				<div class="button">
-						<button id="reverse">Reverse Axis</button>
-				</div>
-			</div>
-
-		</div>
-	</div>
-
-</body>
+      <div class="bigbox">
+				<!-- scatterplot -->
+         <div id="graph" class="box"></div>
+         <div class="box">
+            <!-- dropdowns -->
+            <div class="box">
+               <div class="dropdowns">
+                  <p class ="interactionLabel">Choose X variable</p>
+                  <select id="dropdownX"></select>
+                  <p class ="interactionLabel">Choose Y variable</p>
+                  <select id="dropdownY"></select>
+                  <p class ="interactionLabel">Choose Color variable </p>
+                  <select id="dropdownColor"></select>
+                  <img class="colorpic" src="./BuPuu.png" width=130px height=20px> <img/>
+                  <p id="ColorMin"></p>
+                  <p> to </p>
+                  <p id="ColorMax"></p>
+               </div>
+            </div>
+            <div class="box">
+               <div>
+                  <!-- max range sliders -->
+                  <p class ="interactionLabel">Filter X values</p>
+                  <p id="selectedXMax"></p>
+                  <input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
+                  <p id="XMin"></p>
+                  <p> to </p>
+                  <p id="XMax"></p>
+                  <p class ="interactionLabel">Filter Y values</p>
+                  <p id="selectedYMax"></p>
+                  <input id="yVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
+                  <p id="YMin"></p>
+                  <p> to </p>
+                  <p id="YMax"></p>
+               </div>
+            </div>
+            <div class="box">
+               <!-- reverse button-->
+               <div class="button">
+                  <button id="reverse">Reverse Axis</button>
+               </div>
+            </div>
+         </div>
+      </div>
+   </body>
 </html>
