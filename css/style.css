@@ -7,6 +7,13 @@
   padding-right: 30px;
   padding-bottom: 10px;
   font-size: 12px;
+  font: verdana;
+}
+
+#PageTitle {
+    font-size: 40px;
+    color: white;
+    margin: 10px;
 }
 
 svg, .bigbox {
@@ -44,7 +51,7 @@ svg {
   max-width: 40%;
 }
 
-body{
+body {
   margin: 0;
   font-family: arial, sans;
   background-color: #9E9E9E;
@@ -55,15 +62,6 @@ body{
   width: 400px;
 }
 
-.label{
-  font-size: 15px;
-}
-
-.legend text,
-.axis text {
-  font-size: 13px;
-  fill: #333;
-}
 .axis path,
 .axis line{
   fill: none;
@@ -126,7 +124,6 @@ circle.bubble:hover {
   stroke-width: 1.25px;
 }
 
-/* idk how to make css work :( */
 .interactionLabel {
   font-size: 20px;
   font-weight: bold;
@@ -136,4 +133,8 @@ circle.bubble:hover {
 }
 #selectedYMax {
   font-weight: bold;
+}
+
+.title {
+    padding-bottom: 20px;
 }

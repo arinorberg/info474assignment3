@@ -38,7 +38,7 @@
          var yAxis = d3.axisLeft()
          	.scale(yScale);
         // create radius and color, for bubbles on scatterplot
-				var radius = d3.scaleSqrt()
+				 var radius = d3.scaleSqrt()
 					 .range([2,5]);
          var color = d3.scaleOrdinal(d3.schemeCategory20);
           // read in data from csv
@@ -98,7 +98,7 @@
          	// default variables for default scatterplot
          	var selected_x = "crim";
          	var selected_y = "medv";
-         	var selected_color = "chas";
+         	var selected_color = "dis";
 					// identify necessary values for default variables
          	var niceNameX = getNiceName(selected_x);
          	var niceNameY = getNiceName(selected_y);
@@ -116,6 +116,8 @@
 					// add x and y filter min and max labels
          	document.getElementById("XMax").innerHTML = maxX;
          	document.getElementById("YMax").innerHTML = maxY;
+					document.getElementById("XMin").innerHTML = minX;
+					document.getElementById("YMin").innerHTML = minY;
 					// add color scale min and max labels
          	document.getElementById("ColorMax").innerHTML = maxColor;
          	document.getElementById("ColorMin").innerHTML = minColor;
@@ -250,12 +252,11 @@
 						// update chosen filter value label
          		document.getElementById("selectedYMax").innerHTML = filterY;
          		document.getElementById("selectedXMax").innerHTML = filterX;
-         		// dropdown selection values need to update when axes switch
-         		// d3.select("#dropdownX").property("selected", function(d){ return d === selected_x})
-         		// d3.select("#dropdownY").property("selected", function(d){ return d === selected_y})
-         		// ^^^didn't work????
-         		updateGraph(selected_x, selected_y, selected_color, filterX, filterY);
-
+         		// update dropdown selections
+					 	document.getElementById('dropdownX').value = selected_x;
+						document.getElementById('dropdownY').value = selected_y;
+						// redraw scatterplot
+						updateGraph(selected_x, selected_y, selected_color, filterX, filterY);
          	});
          	// update x-axis when x filter is changed (slider)
          	document.getElementById('xVal').addEventListener('change', function() {
@@ -278,6 +279,7 @@
          		.attr('height', height + margin.top + margin.bottom)
          		.append('g')
          		.attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+          // create domains for the x and y scale
           xScale.domain(d3.extent(data, function(d){
          				if (d[selected_x] <= filterX) {
          						return d[selected_x];
@@ -359,20 +361,22 @@
          		});
           // add title to graph
          	svg.append("text")
-                .attr("x", (width / 2))
-                .attr("y", 0 - (margin.top / 2))
-                .attr("text-anchor", "middle")
-                .style("font-size", "16px")
-                .text(niceNameX + " vs. " + niceNameY);
+            .attr("x", 45 + (width / 2))
+            .attr("y", 0 - (margin.top / 2))
+            .attr("text-anchor", "middle")
+						.attr('class', 'title')
+            .style("font-size", "18px")
+						.style("font-weight", "bold")
+            .text(niceNameX + " vs. " + niceNameY);
          	// add y axis label
          	svg.append('text')
          		.attr('x', 0)
          		.attr('y', 0)
          		.attr('class', 'label')
-              .text(selected_y);
+            .text(selected_y);
          	// add x axis label
          	svg.append('text')
-         		.attr('x', width + 45)
+         		.attr('x', width + 30)
          		.attr('y', height)
          		.attr('text-anchor', 'end')
          		.attr('class', 'label')
@@ -382,6 +386,7 @@
 
       </script>
 
+			<p id="PageTitle">Analyzing Boston Neighborhoods</p>
       <div class="bigbox">
 				<!-- scatterplot -->
          <div class="box">
@@ -412,8 +417,8 @@
             </div>
             <div class="box">
                <div>
-                  <!-- max range sliders -->
 
+                  <!-- max range sliders -->
                   <p class ="interactionLabel">Filter X values</p>
                   <p id="selectedXMax"></p>
 									<input id="xVal" type="range" min="0" max="1" step="0.1" value="0.5"/>
