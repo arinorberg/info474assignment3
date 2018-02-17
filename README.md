@@ -1,5 +1,6 @@
 # info474assignment3
-
+## Check out our github wiki page for details on our project
+## Hello! here's some information about our data:
 Variables
 
 There are 14 attributes in each case of the dataset. They are:
